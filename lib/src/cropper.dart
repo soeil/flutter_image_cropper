@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import 'options.dart';
@@ -13,8 +14,7 @@ import 'options.dart';
 /// A convenient class wraps all api functions of **ImageCropper** plugin
 ///
 class ImageCropper {
-  static const MethodChannel _channel =
-      const MethodChannel('plugins.hunghd.vn/image_cropper');
+  static const MethodChannel _channel = const MethodChannel('plugins.hunghd.vn/image_cropper');
 
   ///
   /// Launch cropper UI for an image.
@@ -58,11 +58,11 @@ class ImageCropper {
   /// on Android, so it can be lost later, you are responsible for storing it somewhere
   /// permanent (if needed).
   ///
-  static Future<File?> cropImage({
-    required String sourcePath,
-    int? maxWidth,
-    int? maxHeight,
-    CropAspectRatio? aspectRatio,
+  static Future<File> cropImage({
+    @required String sourcePath,
+    int maxWidth,
+    int maxHeight,
+    CropAspectRatio aspectRatio,
     List<CropAspectRatioPreset> aspectRatioPresets = const [
       CropAspectRatioPreset.original,
       CropAspectRatioPreset.square,
@@ -73,8 +73,8 @@ class ImageCropper {
     CropStyle cropStyle = CropStyle.rectangle,
     ImageCompressFormat compressFormat = ImageCompressFormat.jpg,
     int compressQuality = 90,
-    AndroidUiSettings? androidUiSettings,
-    IOSUiSettings? iosUiSettings,
+    AndroidUiSettings androidUiSettings,
+    IOSUiSettings iosUiSettings,
   }) async {
     assert(await File(sourcePath).exists());
     assert(maxWidth == null || maxWidth > 0);
@@ -87,8 +87,7 @@ class ImageCropper {
       'max_height': maxHeight,
       'ratio_x': aspectRatio?.ratioX,
       'ratio_y': aspectRatio?.ratioY,
-      'aspect_ratio_presets':
-          aspectRatioPresets.map<String>(aspectRatioPresetName).toList(),
+      'aspect_ratio_presets': aspectRatioPresets.map<String>(aspectRatioPresetName).toList(),
       'crop_style': cropStyleName(cropStyle),
       'compress_format': compressFormatName(compressFormat),
       'compress_quality': compressQuality,
@@ -96,8 +95,7 @@ class ImageCropper {
       ..addAll(androidUiSettings?.toMap() ?? {})
       ..addAll(iosUiSettings?.toMap() ?? {});
 
-    final String? resultPath =
-        await _channel.invokeMethod('cropImage', arguments);
+    final String resultPath = await _channel.invokeMethod('cropImage', arguments);
     return resultPath == null ? null : new File(resultPath);
   }
 }
